@@ -33,9 +33,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         Greeting(
                             "My current value is ${
-                                mainActivityViewModel.myCountDownTimer.collectAsState(
-                                    initial = 10
-                                ).value
+                                mainActivityViewModel.myCountDownTimer.collectAsState(initial = 10).value
                             }"
                         )
                     }
