@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.fold
 import kotlinx.coroutines.flow.map
@@ -16,10 +17,12 @@ class MainActivityViewModel : ViewModel() {
         val startingValue = 10
         var currentValue = startingValue
         emit(currentValue)
+        println("The value from VM is $currentValue")
         while (currentValue > 0) {
             delay(1000)
             currentValue--
             emit(currentValue)
+            println("The value from VM is $currentValue")
         }
     }
 
@@ -48,12 +51,34 @@ class MainActivityViewModel : ViewModel() {
 
             println("Accumulated folded value(sum of all numbers 0 to 10 + 100 initial + 1 end value) is $foldedResultPlusInitialValue")
 
-            val foldedResultPlusInitialValueWithOperator = myCountDownTimer.filter { it % 2 == 0 }.fold(100) { acc: Int, value: Int ->
-                acc + value
-            }.plus(1)
+            val foldedResultPlusInitialValueWithOperator =
+                myCountDownTimer.filter { it % 2 == 0 }.fold(100) { acc: Int, value: Int ->
+                    acc + value
+                }.plus(1)
 
             println("Accumulated folded value(10 + 8 + 6 + 4 + 2 + 0 + 100 initial + 1 end value) is $foldedResultPlusInitialValueWithOperator")
 
+            flatMapsExample()
+        }
+    }
+
+    private fun flatMapsExample() {
+        val flow1 = flow {
+            emit(1)
+            delay(500)
+            emit(2)
+        }
+
+        viewModelScope.launch {
+            flow1.flatMapConcat { valueFromFlow1 ->
+                flow {
+                    emit(valueFromFlow1 + 1)
+                    delay(500)
+                    emit(valueFromFlow1 + 2)
+                }
+            }.collect {
+                println("The value from the flow1 + flow is $it")
+            }
         }
     }
 }
